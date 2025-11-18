@@ -1,0 +1,23 @@
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS builder
+
+WORKDIR /src
+
+COPY products.Server/products.Server.csproj products.Server/
+RUN dotnet restore products.Server/products.Server.csproj --verbosity quiet
+
+COPY products.Server/ products.Server/
+
+WORKDIR /src/products.Server
+RUN dotnet publish -c Release -o /app/publish
+
+FROM mcr.microsoft.com/dotnet/aspnet:8.0
+
+WORKDIR /app
+
+COPY --from=builder /app/publish .
+
+EXPOSE 8080
+
+ENV ASPNETCORE_URLS=http://+:8080
+
+ENTRYPOINT ["dotnet", "products.Server.dll"]
