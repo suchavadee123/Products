@@ -1,0 +1,61 @@
+<div class="container">
+  <div class="header">IT 00-1</div>
+  
+  <form [formGroup]="productForm" (ngSubmit)="addProduct()">
+    <div class="input-section">
+      <label>รหัสสินค้า</label>
+      <input 
+        type="text" 
+        formControlName="productCode"
+        placeholder="XXXX-XXXX-XXXX-XXXX"
+        maxlength="19"
+        (input)="formatCodeInput($event)">
+      <button type="submit" class="btn-add">ADD</button>
+    </div>
+    <div *ngIf="productForm.get('productCode')?.invalid && productForm.get('productCode')?.touched" class="error-message">
+      <span *ngIf="productForm.get('productCode')?.errors?.['required']">รหัสสินค้าจำเป็นต้องกรอก</span>
+      <span *ngIf="productForm.get('productCode')?.errors?.['invalidLength']">
+        รหัสสินค้าต้องมี 16 หลัก (ปัจจุบัน: {{ productForm.get('productCode')?.errors?.['invalidLength']?.actualLength }} หลัก)
+      </span>
+      <span *ngIf="productForm.get('productCode')?.errors?.['invalidFormat']">รหัสสินค้าต้องเป็นตัวเลขและตัวอักษรภาษาอังกฤษพิมพ์ใหญ่เท่านั้น</span>
+      <span *ngIf="productForm.get('productCode')?.errors?.['invalidCode']">รูปแบบรหัสสินค้าไม่ถูกต้อง</span>
+    </div>
+  </form>
+
+  <table class="product-table">
+    <thead>
+      <tr>
+        <th>Id</th>
+        <th>รหัสสินค้า (16 หลัก)</th>
+        <th>บาร์โค้ดสินค้า</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (product of products; track product.id) {
+        <tr>
+          <td>{{ product.id }}</td>
+          <td>{{ formatCode(product.productCodeClean) }}</td>
+          <td>
+            <canvas [id]="'barcode-' + product.id"></canvas>
+          </td>
+          <td>
+            <button class="btn-delete" (click)="openDeleteDialog(product)">ลบ</button>
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+
+  @if (showDeleteDialog) {
+    <div class="overlay" (click)="closeDeleteDialog()">
+      <div class="dialog" (click)="$event.stopPropagation()">
+        <p>ต้องการลบข้อมูล รหัสสินค้า {{ productToDelete ? formatCode(productToDelete.productCodeClean) : '' }} หรือไม่?</p>
+        <div class="dialog-buttons">
+          <button class="btn-confirm" (click)="confirmDelete()">ยืนยัน</button>
+          <button class="btn-cancel" (click)="closeDeleteDialog()">ยกเลิก</button>
+        </div>
+      </div>
+    </div>
+  }
+</div>
